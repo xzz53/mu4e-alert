@@ -201,57 +201,54 @@ See also https://github.com/jwiegley/alert."
                (file-executable-p mu4e-mu-binary))
     (user-error "Please set `mu4e-mu-binary' to the full path to the mu binary, before attempting to enable `mu4e-alert'")))
 
-(defun mu4e-alert--parse-mails (buffer)
-  "Parse the emails in BUFFER.
-The buffer holds the emails received from mu in sexp format"
-  (read (concat "("
-                (with-current-buffer buffer (buffer-string))
-                ")")))
+(defvar mu4e-alert--header-func-save
+  "Saved :header handler from mu4e.")
 
-(defun mu4e-alert--get-mail-sentinel (callback)
-  "Create sentinel for process to get mails from mu, CALLBACK is called with the unread mails."
-  (lambda (process _)
-    ;; If the process has completed successfully parse the mails
-    ;; and execute the callback
-    (when (equal (process-status process) 'exit)
-      (cond ((zerop (process-exit-status process))
-             (funcall callback (mu4e-alert--parse-mails (process-buffer process))))
-            ((= (process-exit-status process) 4)
-             (funcall callback nil))))
+(defvar mu4e-alert--found-func-save
+  "Saved :found handler from mu4e.")
 
-    ;; Kill the buffer if the process has terminated
-    (when (memql (process-status process) '(exit signal))
-      (kill-buffer (process-buffer process)))))
+(defvar mu4e-alert--erase-func-save
+  "Saved :erase handler from mu4e.")
 
-(defun mu4e-alert--get-mail-output-buffer ()
-  "Get buffer for storing mails received from mu."
-  (with-current-buffer (get-buffer-create " *mu4e-alert-mails*")
-    (rename-uniquely)
-    (current-buffer)))
+(defvar mu4e-alert--messages
+  "List of messages received by :header callback.")
+
+(defun mu4e-alert--erase-func ()
+  "Erase handler for mu process.")
+
+(defun mu4e-alert--get-found-func (callback)
+  "Create found handler for mu process.
+CALLBACK will be invoked by retturned lambda"
+  (lexical-let ((cb callback))
+    (lambda (found)
+      ;; (message (format "%d unread messages" (length mu4e-alert--messages)))
+      (funcall cb mu4e-alert--messages)
+      (setq mu4e-header-func mu4e-alert--header-func-save
+            mu4e-found-func mu4e-alert--found-func-save
+            mu4e-erase-func mu4e-alert--erase-func-save))))
+
+(defun mu4e-alert--header-func (msg)
+  "Message header handler for mu process.
+MSG argument is message plist."
+  (push msg mu4e-alert--messages))
 
 (defun mu4e-alert--get-mu-unread-emails-1 (callback)
-  "Invoke a mu to get interesting emails and call CALLBACK with the results.
-
-This is used internally by `mu4e-alert--get-mu-unread-emails' which throttles
-the requests for unread emails."
-  (let ((default-directory (expand-file-name "~")))
-    (set-process-sentinel (apply #'start-process
-                                 "mu4e-alert-unread-mails"
-                                 (mu4e-alert--get-mail-output-buffer)
-                                 mu4e-mu-binary
-                                 (append (list "find"
-                                               "--nocolor"
-                                               "-o"
-                                               "sexp"
-                                               "--sortfield=d"
-                                               "-z"
-                                               (format "--maxnum=%d" mu4e-alert-max-messages-to-process))
-                                         (when mu4e-headers-skip-duplicates
-                                           (list "-u"))
-                                         (when mu4e-mu-home
-                                           (list (concat "--muhome=" mu4e-mu-home)))
-                                         (split-string mu4e-alert-interesting-mail-query)))
-                          (mu4e-alert--get-mail-sentinel callback))))
+  "Get messages from mu and invoke CALLBACK."
+  (when (mu4e~proc-running-p)
+    (setq mu4e-alert--header-func-save mu4e-header-func
+          mu4e-alert--found-func-save mu4e-found-func
+          mu4e-alert--erase-func-save mu4e-erase-func)
+    (setq mu4e-header-func 'mu4e-alert--header-func
+          mu4e-found-func (mu4e-alert--get-found-func callback)
+          mu4e-erase-func 'mu4e-alert--erase-func)
+    (setq mu4e-alert--messages nil)
+    (mu4e~proc-find mu4e-alert-interesting-mail-query
+                    nil
+                    :date
+                    nil
+                    mu4e-alert-max-messages-to-process
+                    nil
+                    nil)))
 
 (defvar mu4e-alert--fetch-timer nil
   "The scheduled fetching of mails from mu.")
@@ -533,10 +530,9 @@ ALL-MAILS are the all the unread emails"
   (add-to-list 'global-mode-string '(:eval mu4e-alert-mode-line) t)
   (add-hook 'mu4e-view-mode-hook #'mu4e-alert-update-mail-count-modeline)
   (add-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
-  (add-hook (if (boundp 'mu4e-message-changed-hook)
-                   'mu4e-message-changed-hook
-                 'mu4e-msg-changed-hook)
-            #'mu4e-alert-update-mail-count-modeline)
+  (advice-add #'mu4e~headers-update-handler
+              :after (lambda (&rest _) (mu4e-alert-update-mail-count-modeline))
+              '((name . "mu4e-alert")))
   (ad-enable-advice #'mu4e-context-switch 'around 'mu4e-alert-update-mail-count-modeline)
   (ad-activate #'mu4e-context-switch)
   (mu4e-alert-update-mail-count-modeline))
@@ -547,10 +543,7 @@ ALL-MAILS are the all the unread emails"
   (setq global-mode-string (delete '(:eval mu4e-alert-mode-line) global-mode-string))
   (remove-hook 'mu4e-view-mode-hook #'mu4e-alert-update-mail-count-modeline)
   (remove-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
-  (remove-hook (if (boundp 'mu4e-message-changed-hook)
-                   'mu4e-message-changed-hook
-                 'mu4e-msg-changed-hook)
-               #'mu4e-alert-update-mail-count-modeline)
+  (advice-remove #'mu4e~headers-update-handler "mu4e-alert")
   (ad-disable-advice #'mu4e-context-switch 'around 'mu4e-alert-update-mail-count-modeline)
   (ad-deactivate #'mu4e-context-switch))
 

@@ -219,13 +219,11 @@ See also https://github.com/jwiegley/alert."
 (defun mu4e-alert--get-found-func (callback)
   "Create found handler for mu process.
 CALLBACK will be invoked by retturned lambda"
-  (lexical-let ((cb callback))
-    (lambda (found)
-      ;; (message (format "%d unread messages" (length mu4e-alert--messages)))
-      (funcall cb mu4e-alert--messages)
-      (setq mu4e-header-func mu4e-alert--header-func-save
-            mu4e-found-func mu4e-alert--found-func-save
-            mu4e-erase-func mu4e-alert--erase-func-save))))
+  (lambda (found)
+    (funcall callback mu4e-alert--messages)
+    (setq mu4e-header-func mu4e-alert--header-func-save
+          mu4e-found-func mu4e-alert--found-func-save
+          mu4e-erase-func mu4e-alert--erase-func-save)))
 
 (defun mu4e-alert--header-func (msg)
   "Message header handler for mu process.

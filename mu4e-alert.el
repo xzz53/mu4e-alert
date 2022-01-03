@@ -373,7 +373,7 @@ This only removes the hints added by `mu4e-alert'"
                            (when (and buffer
                                       (get-buffer-window buffer t))
                              (window-frame (get-buffer-window buffer t))))
-                         (list mu4e~main-buffer-name)))))
+                         (list mu4e-main-buffer-name)))))
 
 (defun mu4e-alert--setup-clear-urgency ()
   "Setup hooks to clear the urgency hooks."
@@ -400,9 +400,9 @@ This only removes the hints added by `mu4e-alert'"
   (cl-remove-if (lambda (mail)
                   (prog1 (and (not mu4e-alert-notify-repeated-mails)
                               (ht-get mu4e-alert-repeated-mails
-                                      (plist-get mail :docid)))
+                                      (plist-get mail :message-id)))
                     (ht-set! mu4e-alert-repeated-mails
-                             (plist-get mail :docid)
+                             (plist-get mail :message-id)
                              t)))
                 mails))
 

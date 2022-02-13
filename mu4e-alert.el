@@ -514,10 +514,11 @@ ALL-MAILS are the all the unread emails"
 
 ;; Tying all the above together
 
-(defadvice mu4e-context-switch (around mu4e-alert-update-mail-count-modeline disable)
-  "Advice `mu4e-context-switch' to update mode-line after changing the context."
+(defun mu4e-context-switch--update-mail-count-modeline (orig args)
+  "Advice to update mode-line after changing the context.
+ORIG is the original function to be called with ARGS."
   (let ((context mu4e~context-current))
-    ad-do-it
+    (apply orig args)
     (unless (equal context mu4e~context-current)
       (mu4e-alert-update-mail-count-modeline))))
 
@@ -526,24 +527,18 @@ ALL-MAILS are the all the unread emails"
   "Enable display of unread emails in mode-line."
   (interactive)
   (add-to-list 'global-mode-string '(:eval mu4e-alert-mode-line) t)
-  (add-hook 'mu4e-view-mode-hook #'mu4e-alert-update-mail-count-modeline)
   (add-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-add #'mu4e~headers-update-handler
-              :after (lambda (&rest _) (mu4e-alert-update-mail-count-modeline))
-              '((name . "mu4e-alert")))
-  (ad-enable-advice #'mu4e-context-switch 'around 'mu4e-alert-update-mail-count-modeline)
-  (ad-activate #'mu4e-context-switch)
+  (add-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
+  (advice-add #'mu4e-context-switch :around #'mu4e-context-switch--update-mail-count-modeline)
   (mu4e-alert-update-mail-count-modeline))
 
 (defun mu4e-alert-disable-mode-line-display ()
   "Disable display of unread emails in mode-line."
   (interactive)
   (setq global-mode-string (delete '(:eval mu4e-alert-mode-line) global-mode-string))
-  (remove-hook 'mu4e-view-mode-hook #'mu4e-alert-update-mail-count-modeline)
   (remove-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-remove #'mu4e~headers-update-handler "mu4e-alert")
-  (ad-disable-advice #'mu4e-context-switch 'around 'mu4e-alert-update-mail-count-modeline)
-  (ad-deactivate #'mu4e-context-switch))
+  (remove-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
+  (advice-remove #'mu4e-context-switch #'mu4e-context-switch--update-mail-count-modeline))
 
 ;;;###autoload
 (defun mu4e-alert-enable-notifications ()

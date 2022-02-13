@@ -201,13 +201,13 @@ See also https://github.com/jwiegley/alert."
                (file-executable-p mu4e-mu-binary))
     (user-error "Please set `mu4e-mu-binary' to the full path to the mu binary, before attempting to enable `mu4e-alert'")))
 
-(defvar mu4e-alert--header-func-save
+(defvar mu4e-alert--header-func-save mu4e-header-func
   "Saved :header handler from mu4e.")
 
-(defvar mu4e-alert--found-func-save
+(defvar mu4e-alert--found-func-save mu4e-found-func
   "Saved :found handler from mu4e.")
 
-(defvar mu4e-alert--erase-func-save
+(defvar mu4e-alert--erase-func-save mu4e-erase-func
   "Saved :erase handler from mu4e.")
 
 (defvar mu4e-alert--messages
@@ -233,9 +233,6 @@ MSG argument is message plist."
 (defun mu4e-alert--get-mu-unread-emails-1 (callback)
   "Get messages from mu and invoke CALLBACK."
   (when (mu4e~proc-running-p)
-    (setq mu4e-alert--header-func-save mu4e-header-func
-          mu4e-alert--found-func-save mu4e-found-func
-          mu4e-alert--erase-func-save mu4e-erase-func)
     (setq mu4e-header-func 'mu4e-alert--header-func
           mu4e-found-func (mu4e-alert--get-found-func callback)
           mu4e-erase-func 'mu4e-alert--erase-func)

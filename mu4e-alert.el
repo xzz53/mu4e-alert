@@ -513,7 +513,7 @@ ALL-MAILS are the all the unread emails"
 
 ;; Tying all the above together
 
-(defun mu4e-alert--context-switch (orig args)
+(defun mu4e-alert--context-switch (orig &rest args)
   "Advice to update mode-line after changing the context.
 ORIG is the original function to be called with ARGS."
   (let ((context mu4e~context-current))

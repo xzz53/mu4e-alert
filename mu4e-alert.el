@@ -21,14 +21,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+
 
 ;;; Commentary:
 
 ;; This package provides desktop notifications for mu4e, additionally it can
 ;; display the number of unread emails in the modeline
 
-
+
 
 ;;; Code:
 
@@ -43,7 +43,7 @@
 (require 'pcase)
 (require 'cl-lib)
 
-
+
 
 ;; Customizations
 
@@ -187,7 +187,7 @@ See also https://github.com/jwiegley/alert."
   :set (lambda (_ value) (mu4e-alert-set-default-style value))
   :group 'mu4e-alert)
 
-
+
 
 ;; Core functions
 
@@ -278,7 +278,7 @@ CALLBACK is called with one argument the interesting emails."
                      #'mu4e-alert--get-mu-unread-emails-1
                      #'mu4e-alert--email-processor)))
 
-
+
 
 ;; Mode-line indicator for unread emails
 
@@ -322,7 +322,7 @@ formatter when user clicks on mode-line indicator"
                                                                          (length mails)))
                                      (force-mode-line-update))))
 
-
+
 
 ;; Desktop notifications for unread emails
 
@@ -507,7 +507,7 @@ ALL-MAILS are the all the unread emails"
                                        (when (memql 'subjects mu4e-alert-email-notification-types)
                                          (mu4e-alert-notify-unread-messages new-mails))))))
 
-
+
 
 ;; Tying all the above together
 

@@ -6,7 +6,7 @@
 ;; URL: https://github.com/iqbalansari/mu4e-alert
 ;; Keywords: mail, convenience
 ;; Version: 1.0
-;; Package-Requires: ((alert "1.2") (s "1.10.0") (ht "2.0") (emacs "24.3"))
+;; Package-Requires: ((alert "1.2") (s "1.10.0") (ht "2.0") (emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -511,7 +511,7 @@ ALL-MAILS are the all the unread emails"
 
 ;; Tying all the above together
 
-(defun mu4e-context-switch--update-mail-count-modeline (orig args)
+(defun mu4e-alert--context-switch (orig args)
   "Advice to update mode-line after changing the context.
 ORIG is the original function to be called with ARGS."
   (let ((context mu4e~context-current))
@@ -526,7 +526,7 @@ ORIG is the original function to be called with ARGS."
   (add-to-list 'global-mode-string '(:eval mu4e-alert-mode-line) t)
   (add-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
   (add-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-add #'mu4e-context-switch :around #'mu4e-context-switch--update-mail-count-modeline)
+  (advice-add #'mu4e-context-switch :around #'mu4e-alert--context-switch)
   (mu4e-alert-update-mail-count-modeline))
 
 (defun mu4e-alert-disable-mode-line-display ()
@@ -535,7 +535,7 @@ ORIG is the original function to be called with ARGS."
   (setq global-mode-string (delete '(:eval mu4e-alert-mode-line) global-mode-string))
   (remove-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
   (remove-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-remove #'mu4e-context-switch #'mu4e-context-switch--update-mail-count-modeline))
+  (advice-remove #'mu4e-context-switch #'mu4e-alert--context-switch))
 
 ;;;###autoload
 (defun mu4e-alert-enable-notifications ()

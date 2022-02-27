@@ -218,8 +218,8 @@ See also https://github.com/jwiegley/alert."
 
 (defun mu4e-alert--get-found-func (callback)
   "Create found handler for mu process.
-CALLBACK will be invoked by retturned lambda"
-  (lambda (found)
+CALLBACK will be invoked by returned lambda"
+  (lambda (_found)
     (funcall callback mu4e-alert--messages)
     (setq mu4e-header-func mu4e-alert--header-func-save
           mu4e-found-func mu4e-alert--found-func-save

@@ -1,12 +1,14 @@
 ;;; mu4e-alert.el --- Desktop notification for mu4e  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2017  Iqbal Ansari
+;; Copyright (C) 2021-2022  Mikhail Rudenko
 
 ;; Author: Iqbal Ansari <iqbalansari02@yahoo.com>
+;; Maintainer: Mikhail Rudenko <mike.rudenko@gmail.com>
 ;; URL: https://github.com/iqbalansari/mu4e-alert
 ;; Keywords: mail, convenience
 ;; Version: 1.0
-;; Package-Requires: ((alert "1.2") (s "1.10.0") (ht "2.0") (emacs "24.3"))
+;; Package-Requires: ((alert "1.2") (s "1.10.0") (ht "2.0") (emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,14 +23,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+
 
 ;;; Commentary:
 
 ;; This package provides desktop notifications for mu4e, additionally it can
 ;; display the number of unread emails in the modeline
 
-
+
 
 ;;; Code:
 
@@ -43,7 +45,7 @@
 (require 'pcase)
 (require 'cl-lib)
 
-
+
 
 ;; Customizations
 
@@ -208,7 +210,7 @@ See also https://github.com/jwiegley/alert."
   :set (lambda (_ value) (mu4e-alert-set-default-style value))
   :group 'mu4e-alert)
 
-
+
 
 ;; Core functions
 
@@ -239,8 +241,8 @@ See also https://github.com/jwiegley/alert."
 
 (defun mu4e-alert--get-found-func (callback)
   "Create found handler for mu process.
-CALLBACK will be invoked by retturned lambda"
-  (lambda (found)
+CALLBACK will be invoked by returned lambda"
+  (lambda (_found)
     (funcall callback mu4e-alert--messages)
     (setq mu4e-header-func mu4e-alert--header-func-save
           mu4e-found-func mu4e-alert--found-func-save
@@ -299,7 +301,7 @@ CALLBACK is called with one argument the interesting emails."
                      #'mu4e-alert--get-mu-unread-emails-1
                      #'mu4e-alert--email-processor)))
 
-
+
 
 ;; Mode-line indicator for unread emails
 
@@ -343,7 +345,7 @@ formatter when user clicks on mode-line indicator"
                                                                          (length mails)))
                                      (force-mode-line-update))))
 
-
+
 
 ;; Desktop notifications for unread emails
 
@@ -544,11 +546,11 @@ ALL-MAILS are the all the unread emails"
                                        (when (memql 'subjects mu4e-alert-email-notification-types)
                                          (mu4e-alert-notify-unread-messages new-mails))))))
 
-
+
 
 ;; Tying all the above together
 
-(defun mu4e-context-switch--update-mail-count-modeline (orig args)
+(defun mu4e-alert--context-switch (orig args)
   "Advice to update mode-line after changing the context.
 ORIG is the original function to be called with ARGS."
   (let ((context mu4e~context-current))
@@ -563,7 +565,7 @@ ORIG is the original function to be called with ARGS."
   (add-to-list 'global-mode-string '(:eval mu4e-alert-mode-line) t)
   (add-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
   (add-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-add #'mu4e-context-switch :around #'mu4e-context-switch--update-mail-count-modeline)
+  (advice-add #'mu4e-context-switch :around #'mu4e-alert--context-switch)
   (mu4e-alert-update-mail-count-modeline))
 
 (defun mu4e-alert-disable-mode-line-display ()
@@ -572,7 +574,7 @@ ORIG is the original function to be called with ARGS."
   (setq global-mode-string (delete '(:eval mu4e-alert-mode-line) global-mode-string))
   (remove-hook 'mu4e-index-updated-hook #'mu4e-alert-update-mail-count-modeline)
   (remove-hook 'mu4e-message-changed-hook #'mu4e-alert-update-mail-count-modeline)
-  (advice-remove #'mu4e-context-switch #'mu4e-context-switch--update-mail-count-modeline))
+  (advice-remove #'mu4e-context-switch #'mu4e-alert--context-switch))
 
 ;;;###autoload
 (defun mu4e-alert-enable-notifications ()

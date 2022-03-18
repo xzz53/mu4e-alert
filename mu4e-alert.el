@@ -159,6 +159,27 @@ Note that not all 'alert' notification backends support this."
   :type 'string
   :group 'mu4e-alert)
 
+(defcustom mu4e-alert-audio-player (or (executable-find "aplay")
+                                         (executable-find "afplay"))
+  "Music player used to play sounds."
+  :group 'mu4e-alert
+  :type 'string)
+
+(defcustom mu4e-alert-sound nil
+  "The path to a sound file that´s to be played when a new mail is received."
+  :group 'mu4e-alert
+  :type 'file)
+
+(defcustom mu4e-alert-sound-p t
+  "Determines whether to play a sound when a new mail is received."
+  :type 'boolean
+  :group 'mu4e-alert)
+
+(defcustom mu4e-alert-sound-args nil
+  "Arguments used when playing `mu4e-alert-sound'."
+  :group 'mu4e-alert
+  :type 'string)
+
 ;;;###autoload
 (defun mu4e-alert-set-default-style (value)
   "Set the default style for unread email notifications.
@@ -470,6 +491,21 @@ ALL-MAILS are the all the unread emails"
                                           (plist-get mail :subject))
                                         mail-group))))))
 
+(defun mu4e-alert-play-sound ()
+  "Play the alert sound."
+  (when mu4e-alert-sound-p
+    (cond ((and (fboundp 'sound-wav-play)
+		mu4e-alert-sound)
+	   (sound-wav-play mu4e-alert-sound))
+	  ((and mu4e-alert-audio-player
+		mu4e-alert-sound)
+	   (start-process-shell-command
+	    "mu4e-alert-audio-player" nil
+	    (mapconcat 'identity
+		       `(,mu4e-alert-audio-player
+			 ,@(delq nil (list mu4e-alert-sound-args (shell-quote-argument (expand-file-name mu4e-alert-sound)))))
+		       " "))))))
+
 (defun mu4e-alert-notify-unread-messages (mails)
   "Display desktop notification for given MAILS."
   (let* ((mail-groups (funcall mu4e-alert-mail-grouper
@@ -483,11 +519,12 @@ ALL-MAILS are the all the unread emails"
                                 sorted-mail-groups)))
     (dolist (notification (cl-subseq notifications 0 (min 5 (length notifications))))
       (alert (plist-get notification :body)
-             :title (plist-get notification :title)
-             :category "mu4e-alert"
-             :icon mu4e-alert-icon))
+	     :title (plist-get notification :title)
+	     :category "mu4e-alert"
+	     :icon mu4e-alert-icon))
     (when notifications
-      (mu4e-alert-set-window-urgency-maybe))))
+      (progn (mu4e-alert-set-window-urgency-maybe)
+	     (mu4e-alert-play-sound)))))
 
 (defun mu4e-alert-notify-unread-messages-count (mail-count)
   "Display desktop notification for given MAIL-COUNT."

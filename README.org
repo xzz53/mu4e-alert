@@ -5,31 +5,32 @@
   [[https://raw.githubusercontent.com/iqbalansari/mu4e-alert/master/screenshots/mu4e-alert-in-action.png][screenshots/mu4e-alert-in-action.png?raw=true]]
 
 ** Table of contents                                              :TOC_4_gh:
- - [[#mu4e-alert][mu4e alert]]
-   - [[#what-is-this][What is this?]]
-   - [[#requirements][Requirements]]
-   - [[#installation][Installation]]
-     - [[#elpa][ELPA]]
-     - [[#el-get][El-get]]
-   - [[#usage][Usage]]
-     - [[#desktop-notifications-for-unread-emails][Desktop notifications for unread emails]]
-     - [[#mode-line-display-of-unread-emails][Mode Line display of unread emails]]
-   - [[#customizations][Customizations]]
-     - [[#general-options][General options]]
-     - [[#customizing-the-desktop-notifications][Customizing the desktop notifications]]
-       - [[#customizing-the-types-of-notifications-displayed][Customizing the types of notifications displayed]]
-       - [[#customizing-the-notifications-for-unread-emails-counts][Customizing the notifications for unread emails counts]]
-       - [[#customizing-the-notifications-for-unread-emails-subjects][Customizing the notifications for unread emails subjects]]
-       - [[#customizing-urgency-hint][Customizing urgency hint]]
-     - [[#customizing-the-mode-line-display][Customizing the mode-line display]]
-   - [[#getting-desktop-notifications][Getting desktop notifications]]
-     - [[#linux][Linux]]
-       - [[#notifications][notifications]]
-       - [[#libnotify][libnotify]]
-     - [[#mac-osx][Mac OSX]]
-       - [[#growl][growl]]
-       - [[#notifier][notifier]]
-   - [[#advanced-customizations][Advanced customizations]]
+- [[#mu4e-alert][mu4e alert]]
+  - [[#what-is-this][What is this?]]
+  - [[#requirements][Requirements]]
+  - [[#installation][Installation]]
+    - [[#elpa][ELPA]]
+    - [[#el-get][El-get]]
+  - [[#usage][Usage]]
+    - [[#desktop-notifications-for-unread-emails][Desktop notifications for unread emails]]
+    - [[#mode-line-display-of-unread-emails][Mode Line display of unread emails]]
+  - [[#customizations][Customizations]]
+    - [[#general-options][General options]]
+    - [[#customizing-the-desktop-notifications][Customizing the desktop notifications]]
+      - [[#customizing-the-types-of-notifications-displayed][Customizing the types of notifications displayed]]
+      - [[#customizing-the-notifications-for-unread-emails-counts][Customizing the notifications for unread emails counts]]
+      - [[#customizing-the-notifications-for-unread-emails-subjects][Customizing the notifications for unread emails subjects]]
+      - [[#customizing-urgency-hint][Customizing urgency hint]]
+      - [[#customizing-notification-sounds][Customizing notification sounds]]
+    - [[#customizing-the-mode-line-display][Customizing the mode-line display]]
+  - [[#getting-desktop-notifications][Getting desktop notifications]]
+    - [[#linux][Linux]]
+      - [[#notifications][notifications]]
+      - [[#libnotify][libnotify]]
+    - [[#mac-osx][Mac OSX]]
+      - [[#growl][growl]]
+      - [[#notifier][notifier]]
+  - [[#advanced-customizations][Advanced customizations]]
 
 ** What is this?
    mu4e-alert is an Emacs extension providing desktop notifications for [[https://github.com/djcb/mu][mu4e]],
@@ -179,6 +180,20 @@
      By default ~mu4e-alert~ sets the urgency hint for current Emacs frame (or
      the any mu4e frame if available), you can disable it by setting the
      variable ~mu4e-alert-set-window-urgency~ to ~nil~.
+
+**** Customizing notification sounds
+     ~mu4e-alert~ can now play a sound when a new mail is received.
+
+     The following variables can be used to customize the notification sounds.
+
+     |-------------------------+--------------------------------------------------------------------------------|
+     | Variable                | Aspect customized                                                              |
+     |-------------------------+--------------------------------------------------------------------------------|
+     | mu4e-alert-audio-player | Music player used to play sounds (by default, search for ~aplay~)                |
+     | mu4e-alert-sound        | The path to a sound file that's to be played when a new mail is received       |
+     | mu4e-alert-sound-p      | Boolean value to determine whether to play a sound when a new mail is received |
+     | mu4e-alert-sound-args   | Arguments used when playing ~mu4e-alert-sound~                                   |
+     |-------------------------+--------------------------------------------------------------------------------|
 
 *** Customizing the mode-line display
     The mode-line indicator for unread emails can be customized by setting the

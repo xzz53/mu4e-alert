@@ -222,6 +222,7 @@ See also https://github.com/jwiegley/alert."
   "Create found handler for mu process.
 CALLBACK will be invoked by returned lambda"
   (lambda (_found)
+    (mu4e-alert--find-end)
     (funcall callback mu4e-alert--messages)
     (setq mu4e-header-func mu4e-alert--header-func-save
           mu4e-found-func mu4e-alert--found-func-save
@@ -235,17 +236,25 @@ MSG argument is message plist."
 (defun mu4e-alert--get-mu-unread-emails-1 (callback)
   "Get messages from mu and invoke CALLBACK."
   (when (mu4e~proc-running-p)
-    (setq mu4e-header-func 'mu4e-alert--header-func
-          mu4e-found-func (mu4e-alert--get-found-func callback)
-          mu4e-erase-func 'mu4e-alert--erase-func)
-    (setq mu4e-alert--messages nil)
-    (mu4e~proc-find mu4e-alert-interesting-mail-query
-                    nil
-                    :date
-                    nil
-                    mu4e-alert-max-messages-to-process
-                    nil
-                    nil)))
+    (if mu4e-alert--finding-p
+        (progn
+          (message "mu4e server busy, retrying in 1 sec")
+          (setq mu4e-alert--fetch-timer
+                (run-at-time 1.0
+                             nil
+                             #'mu4e-alert--get-mu-unread-emails-1
+                             #'mu4e-alert--email-processor)))
+      (setq mu4e-header-func 'mu4e-alert--header-func
+            mu4e-found-func (mu4e-alert--get-found-func callback)
+            mu4e-erase-func 'mu4e-alert--erase-func)
+      (setq mu4e-alert--messages nil)
+      (mu4e~proc-find mu4e-alert-interesting-mail-query
+                      nil
+                      :date
+                      nil
+                      mu4e-alert-max-messages-to-process
+                      nil
+                      nil))))
 
 (defvar mu4e-alert--fetch-timer nil
   "The scheduled fetching of mails from mu.")
@@ -520,6 +529,30 @@ ORIG is the original function to be called with ARGS."
     (apply orig args)
     (unless (equal context mu4e~context-current)
       (mu4e-alert-update-mail-count-modeline))))
+
+(defvar mu4e-alert--finding-p nil)
+
+(defun mu4e-alert--find-start (&rest _)
+  (if mu4e-alert--finding-p
+      (progn
+        (warn "mu4e recursive find start")
+        (message "mu4e recursive find start"))
+    (setq mu4e-alert--finding-p t)
+    (message "mu4e find start"))
+  ;; (backtrace)
+  )
+
+(defun mu4e-alert--find-end (&rest _)
+  (if (not mu4e-alert--finding-p)
+      (progn
+        (warn "mu4e unexpected find end")
+        (message "mu4e unexpected find end"))
+    (setq mu4e-alert--finding-p nil)
+    (message "mu4e find end")))
+
+;; (advice-add #'mu4e--server-find :before #'mu4e-alert--find-start)
+(advice-add #'mu4e~proc-find :before #'mu4e-alert--find-start)
+(advice-add #'mu4e~headers-found-handler :before #'mu4e-alert--find-end)
 
 ;;;###autoload
 (defun mu4e-alert-enable-mode-line-display ()

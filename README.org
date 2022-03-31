@@ -30,6 +30,7 @@
        - [[#growl][growl]]
        - [[#notifier][notifier]]
    - [[#advanced-customizations][Advanced customizations]]
+   - [[#acknowledgments][Acknowledgments]]
 
 ** What is this?
    mu4e-alert is an Emacs extension providing desktop notifications for [[https://github.com/djcb/mu][mu4e]],
@@ -234,3 +235,7 @@
      (alert-add-rule :category "mu4e-alert" :style 'fringe :predicate (lambda (_) (string-match-p "^mu4e-" (symbol-name major-mode))) :continue t)
      (mu4e-alert-enable-notifications)
    #+END_SRC
+
+** Acknowledgments
+   Original mu4e-alert package was developed by @iqbalansari at
+   https://github.com/iqbalansari/mu4e-alert.

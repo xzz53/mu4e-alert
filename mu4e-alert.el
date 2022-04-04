@@ -580,7 +580,7 @@ ORIG is the original function to be called with ARGS."
   "Advice to track `find' request start."
   (setq mu4e-alert--finding-p nil))
 
-(advice-add #'mu4e-alert--mu4e-proc-find-func :before #'mu4e-alert--find-start)
+(advice-add (symbol-function #'mu4e-alert--mu4e-proc-find-func) :before #'mu4e-alert--find-start)
 (advice-add mu4e-alert--found-func-save :before #'mu4e-alert--find-end)
 
 ;;;###autoload

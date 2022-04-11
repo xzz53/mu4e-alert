@@ -48,7 +48,7 @@
 ;; Customizations
 
 (defgroup mu4e-alert nil
-  "Customization options for mu4e-alert"
+  "Customization options for mu4e-alert."
   :group 'mail
   :prefix "mu4e-alert-")
 
@@ -64,7 +64,7 @@ be string to be sent to the mu's find command."
   #'mu4e-alert-default-mode-line-formatter
   "The function used to get the string to be displayed in the mode-line.
 It should be a function that accepts a single argument the current count of
-unread emails and should return the string to be displayed in the mode-line"
+unread emails and should return the string to be displayed in the mode-line."
   :type 'function
   :group 'mu4e-alert)
 
@@ -72,7 +72,7 @@ unread emails and should return the string to be displayed in the mode-line"
   #'mu4e-alert-default-email-count-notification-formatter
   "The function used to get the message for the desktop notification.
 It should be a function that accepts a single argument the current count of
-unread emails and should return the string to be used for the notification"
+unread emails and should return the string to be used for the notification."
   :type 'function
   :group 'mu4e-alert)
 
@@ -137,7 +137,7 @@ subjects - Notify with some content of the email, by default the emails are
 (defcustom mu4e-alert-set-window-urgency t
   "Set window urgency on recieving unread emails.
 
-If non-nil `mu4e-alert' will set the WM_URGENT on detecting unread messages"
+If non-nil `mu4e-alert' will set the WM_URGENT on detecting unread messages."
   :type 'boolean)
 
 (defcustom mu4e-alert-notify-repeated-mails nil
@@ -262,7 +262,7 @@ See also https://github.com/jwiegley/alert."
 
 (defun mu4e-alert--get-found-func (callback)
   "Create found handler for mu process.
-CALLBACK will be invoked by returned lambda"
+CALLBACK will be invoked by returned lambda."
   (lambda (_found)
     (mu4e-alert--find-end)
     (funcall callback mu4e-alert--messages)
@@ -339,7 +339,7 @@ CALLBACK is called with one argument the interesting emails."
 
 (defun mu4e-alert-default-mode-line-formatter (mail-count)
   "Default formatter used to get the string to be displayed in the mode-line.
-MAIL-COUNT is the count of mails for which the string is to displayed"
+MAIL-COUNT is the count of mails for which the string is to displayed."
   (when (not (zerop mail-count))
     (concat " "
             (propertize
@@ -364,7 +364,7 @@ MAIL-COUNT is the count of mails for which the string is to displayed"
 (defun mu4e-alert-view-unread-mails ()
   "View unread mails.
 This is primarily used to enable viewing unread emails by default mode-line
-formatter when user clicks on mode-line indicator"
+formatter when user clicks on mode-line indicator."
   (interactive)
   (mu4e-alert--mu4e-search mu4e-alert-interesting-mail-query))
 
@@ -472,7 +472,7 @@ This is an internal function used by `mu4e-alert-default-mails-grouper'."
 
 (defun mu4e-alert-default-email-count-notification-formatter (mail-count)
   "Default formatter for unread email count.
-MAIL-COUNT is the count of mails for which the string is to displayed"
+MAIL-COUNT is the count of mails for which the string is to displayed."
   (when (not (zerop mail-count))
     (if (= mail-count 1)
         "You have an unread email"

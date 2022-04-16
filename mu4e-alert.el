@@ -260,15 +260,13 @@ See also https://github.com/jwiegley/alert."
 (defun mu4e-alert--erase-func ()
   "Erase handler for mu process.")
 
-(defun mu4e-alert--get-found-func (callback)
-  "Create found handler for mu process.
-CALLBACK will be invoked by returned lambda."
-  (lambda (_found)
-    (mu4e-alert--find-end)
-    (funcall callback mu4e-alert--messages)
-    (setq mu4e-alert-mu4e-header-func-var mu4e-alert--header-func-save
-          mu4e-found-func mu4e-alert--found-func-save
-          mu4e-erase-func mu4e-alert--erase-func-save)))
+(defun mu4e-alert--found-func (_found)
+  "Found handler for mu process."
+  (mu4e-alert--find-end)
+  (mu4e-alert--email-processor mu4e-alert--messages)
+  (setq mu4e-alert-mu4e-header-func-var mu4e-alert--header-func-save
+        mu4e-found-func mu4e-alert--found-func-save
+        mu4e-erase-func mu4e-alert--erase-func-save))
 
 (defun mu4e-alert--header-func (msg)
   "Message header handler for mu process.
@@ -280,18 +278,17 @@ MSG argument is message plist."
 (defvar mu4e-alert--fetch-timer nil
   "The scheduled fetching of mails from mu.")
 
-(defun mu4e-alert--get-mu-unread-emails-1 (callback)
-  "Get messages from mu and invoke CALLBACK."
+(defun mu4e-alert--get-mu-unread-emails-1 ()
+  "Get messages from mu and invoke scheduled callbacks."
   (when (mu4e-alert--mu4e-proc-running-p-func)
     (if mu4e-alert--finding-p
         (setq mu4e-alert--fetch-timer
               (run-at-time 1.0
                            nil
-                           #'mu4e-alert--get-mu-unread-emails-1
-                           #'mu4e-alert--email-processor))
-      (setq mu4e-alert-mu4e-header-func-var 'mu4e-alert--header-func
-            mu4e-found-func (mu4e-alert--get-found-func callback)
-            mu4e-erase-func 'mu4e-alert--erase-func)
+                           #'mu4e-alert--get-mu-unread-emails-1))
+      (setq mu4e-alert-mu4e-header-func-var #'mu4e-alert--header-func
+            mu4e-found-func #'mu4e-alert--found-func
+            mu4e-erase-func #'mu4e-alert--erase-func)
       (setq mu4e-alert--messages nil)
       (mu4e-alert--mu4e-proc-find-func mu4e-alert-interesting-mail-query
                       nil
@@ -328,8 +325,7 @@ CALLBACK is called with one argument the interesting emails."
   (push callback mu4e-alert--callback-queue)
   (setq mu4e-alert--fetch-timer
         (run-at-time 0.5 nil
-                     #'mu4e-alert--get-mu-unread-emails-1
-                     #'mu4e-alert--email-processor)))
+                     #'mu4e-alert--get-mu-unread-emails-1)))
 
 
 

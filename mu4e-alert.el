@@ -452,15 +452,22 @@ This only removes the hints added by `mu4e-alert'"
                              t)))
                 mails))
 
+(defun mu4e-alert--message-address (mail key)
+  "Get a string representing address specified by KEY in MAIL."
+  (let ((addr (car (plist-get mail key))))
+    (or
+     (plist-get addr :name)
+     (plist-get addr :email)
+     (car addr)
+     (cdr addr))))
+
 (defun mu4e-alert--get-group (mail)
   "Get the group the given MAIL should be put in.
 
 This is an internal function used by `mu4e-alert-default-mails-grouper'."
   (pcase mu4e-alert-group-by
-    (`:from (or (caar (plist-get mail :from))
-                (cdar (plist-get mail :from))))
-    (`:to (or (caar (plist-get mail :to))
-              (cdar (plist-get mail :to))))
+    (`:from (mu4e-alert--message-address mail :from))
+    (`:to (mu4e-alert--message-address mail :to))
     (`:maildir (plist-get mail :maildir))
     (`:priority (symbol-value (plist-get mail :maildir)))
     (`:flags (s-join ", " (mapcar #'symbol-value

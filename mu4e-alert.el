@@ -293,7 +293,7 @@ MSG argument is message plist."
       (mu4e-alert--mu4e-proc-find-func mu4e-alert-interesting-mail-query
                       nil
                       :date
-                      nil
+                      'descending
                       mu4e-alert-max-messages-to-process
                       nil
                       nil))))

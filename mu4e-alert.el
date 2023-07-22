@@ -331,7 +331,7 @@ CALLBACK is called with one argument the interesting emails."
 
 ;; Mode-line indicator for unread emails
 
-(defvar mu4e-alert-mode-line nil "The mode-line indicator to display the count of unread emails.")
+(defvar mu4e-alert-mode-line "" "The mode-line indicator to display the count of unread emails.")
 
 (defun mu4e-alert-default-mode-line-formatter (mail-count)
   "Default formatter used to get the string to be displayed in the mode-line.
@@ -370,7 +370,6 @@ formatter when user clicks on mode-line indicator."
                                      (setq mu4e-alert-mode-line (funcall mu4e-alert-modeline-formatter
                                                                          (length mails)))
                                      (force-mode-line-update))))
-
 
 
 ;; Desktop notifications for unread emails

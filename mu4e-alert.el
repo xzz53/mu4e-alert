@@ -295,7 +295,7 @@ MSG argument is message plist."
                       :date
                       'descending
                       mu4e-alert-max-messages-to-process
-                      nil
+                      t
                       nil))))
 
 (defvar mu4e-alert--callback-queue nil

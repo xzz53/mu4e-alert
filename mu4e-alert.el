@@ -1,11 +1,11 @@
 ;;; mu4e-alert.el --- Desktop notification for mu4e  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2017  Iqbal Ansari
-;; Copyright (C) 2021-2022  Mikhail Rudenko
+;; Copyright (C) 2021-2024  Mikhail Rudenko
 
 ;; Author: Iqbal Ansari <iqbalansari02@yahoo.com>
 ;; Maintainer: Mikhail Rudenko <mike.rudenko@gmail.com>
-;; URL: https://github.com/iqbalansari/mu4e-alert
+;; URL: https://github.com/xzz53/mu4e-alert
 ;; Keywords: mail, convenience
 ;; Version: 1.0
 ;; Package-Requires: ((alert "1.2") (s "1.10.0") (ht "2.0") (emacs "24.4"))

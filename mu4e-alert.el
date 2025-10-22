@@ -374,6 +374,12 @@ formatter when user clicks on mode-line indicator."
 
 ;; Desktop notifications for unread emails
 
+;;;; Silence byte-compiler warnings for X11-only functions on non-X builds
+(eval-when-compile
+  (declare-function x-window-property "x-win")
+  (declare-function x-change-window-property "x-win")
+  (declare-function x-delete-window-property "x-win"))
+
 ;;;; Setting urgency hint for Emacs frames
 (defun mu4e-alert--set-x-urgency-hint (frame arg)
   "Set window urgency hint for given FRAME.
